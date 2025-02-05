@@ -3,7 +3,7 @@ import requests
 from googletrans import Translator
 from dotenv import load_dotenv
 # Hugging Face API Key
-load_dotenv()  # Loads the .env file
+
 HF_API_KEY = st.secrets["HF_API_KEY"]
 
 # Model Endpoints
