@@ -1,11 +1,10 @@
+import streamlit as st
 import requests
-import os
 from googletrans import Translator
 from dotenv import load_dotenv
-
 # Hugging Face API Key
 load_dotenv()  # Loads the .env file
-HF_API_KEY = os.getenv("HF_API_KEY")
+HF_API_KEY = st.secrets["HF_API_KEY"]
 
 # Model Endpoints
 MISTRAL_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
