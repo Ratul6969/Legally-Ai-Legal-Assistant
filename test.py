@@ -1,7 +1,8 @@
 import streamlit as st
-import requests
+
 from googletrans import Translator
-from dotenv import load_dotenv
+import requests
+
 # Hugging Face API Key
 
 HF_API_KEY = st.secrets["HF_API_KEY"]
