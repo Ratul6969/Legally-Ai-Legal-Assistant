@@ -1,10 +1,9 @@
 import streamlit as st
-
+import json
 from googletrans import Translator
 import requests
 
 # Hugging Face API Key
-
 HF_API_KEY = st.secrets["HF_API_KEY"]
 
 # Model Endpoints
@@ -17,6 +16,7 @@ translator = Translator()
 # Cache for API responses and translations
 response_cache = {}
 translation_cache = {}
+feedback_data = "feedback.json"
 
 def get_legal_response(prompt):
     """Fetch legal response from Mistral 7B with caching."""
@@ -73,3 +73,17 @@ def process_legal_query(query_bn):
 
 ⚠️ **ডিসক্লেমার:** এটি একটি AI-ভিত্তিক আইনি সহায়তা, পেশাদার আইনজীবীর পরামর্শ নয়।
 """
+
+def save_feedback(user_input, model_response, user_feedback):
+    """Save user feedback for model improvement."""
+    feedback_entry = {
+        "user_input": user_input,
+        "model_response": model_response,
+        "user_feedback": user_feedback
+    }
+    try:
+        with open(feedback_data, "a") as file:
+            json.dump(feedback_entry, file)
+            file.write("\n")
+    except Exception as e:
+        st.error(f"Error saving feedback: {str(e)}")
