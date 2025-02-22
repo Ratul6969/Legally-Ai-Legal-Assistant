@@ -17,9 +17,10 @@ except KeyError:
     st.warning("Please enter your Gemini API key in Streamlit secrets.")
     GEMINI_API_KEY = st.text_input("Gemini API Key (Free Tier):", type="password")
 
-# Initialize Gemini API
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+if "GEMINI_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+else:
+    st.error("⚠️ API key not found! Please add it to Streamlit secrets.")
 
 # Cache for API responses
 response_cache = {}
