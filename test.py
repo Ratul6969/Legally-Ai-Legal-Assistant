@@ -73,7 +73,7 @@ def process_legal_query(query):
         return "⚠️ অনুগ্রহ করে একটি আইনি প্রশ্ন লিখুন।"
 
     # Check for serious or emergency queries and provide relevant advice
-    serious_keywords = ["threat", "rape", "violence", "murder", "emergency", "attack", "abuse"]
+    serious_keywords = ["ধর্ষন", "যৌন হয়রানি", "অশালীন ভাবে ধরা", "খুন", "হামলা", "আঘাত", "abuse"]
     if any(keyword in query.lower() for keyword in serious_keywords):
         return """⚠️ **এটি একটি জরুরি পরিস্থিতি মনে হচ্ছে!**
 
