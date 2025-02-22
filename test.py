@@ -1,75 +1,45 @@
 import streamlit as st
 import json
-from googletrans import Translator
 import requests
 
-# Hugging Face API Key
-HF_API_KEY = st.secrets["HF_API_KEY"]
+# Gemini API Key
+GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
-# Model Endpoints
-MISTRAL_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
-BASE_URL = "https://api-inference.huggingface.co/models/"
+# Gemini Model Endpoint
+BASE_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generate"
 
-headers = {"Authorization": f"Bearer {HF_API_KEY}"}
-translator = Translator()
+headers = {"Content-Type": "application/json"}
 
-# Cache for API responses and translations
+# Cache for API responses
 response_cache = {}
-translation_cache = {}
 feedback_data = "feedback.json"
 
 def get_legal_response(prompt):
-    """Fetch legal response from Mistral 7B with caching."""
+    """Fetch legal response from Gemini API with caching."""
     if prompt in response_cache:
         return response_cache[prompt]
     
-    formatted_prompt = f"Provide a legal response based on the laws of Bangladesh only in bullet points:\n\n{prompt}"
+    formatted_prompt = f"বাংলাদেশের আইন অনুযায়ী শুধুমাত্র বুলেট পয়েন্টে একটি আইনি পরামর্শ দিন:\n\n{prompt}"
+    
     payload = {
-        "inputs": formatted_prompt,
-        "parameters": {"max_new_tokens": 200},  # Reduce token size for faster response
-        "options": {"wait_for_model": False}
+        "contents": [{"parts": [{"text": formatted_prompt}]}],
+        "generationConfig": {"maxOutputTokens": 200}
     }
     
-    response = requests.post(BASE_URL + MISTRAL_MODEL, headers=headers, json=payload)
+    response = requests.post(f"{BASE_URL}?key={GEMINI_API_KEY}", headers=headers, json=payload)
     
     if response.status_code == 200:
-        result = response.json()[0]["generated_text"]
+        result = response.json()["candidates"][0]["content"]["parts"][0]["text"]
         response_cache[prompt] = result  # Store in cache
         return result
-    return "Error: Unable to generate response."
+    return "⚠️ ত্রুটি: আইনি পরামর্শ পাওয়া যায়নি, দয়া করে পুনরায় চেষ্টা করুন।"
 
-def translate_english_to_bangla(english_text):
-    """Translate English text to Bangla using Google Translate with caching."""
-    if not english_text.strip():
-        return "Translation Error: Empty text provided."
-
-    if english_text in translation_cache:
-        return translation_cache[english_text]
-
-    try:
-        bullet_points = english_text.split("\n")
-        translated_points = [
-            translator.translate(point.strip(), src="en", dest="bn").text
-            for point in bullet_points if point.strip()
-        ]
-        result = "\n\n".join(translated_points)
-        translation_cache[english_text] = result  # Store in cache
-        return result
-    except Exception:
-        return "Translation Error: Unable to process translation."
-
-def process_legal_query(query_bn):
-    """Fetch legal response and translate to Bangla."""
-    response_en = get_legal_response(query_bn)
-    
-    if "Error" in response_en:
-        return "⚠️ **ত্রুটি:** আইনি পরামর্শ পাওয়া যায়নি, দয়া করে পুনরায় চেষ্টা করুন।"
-
-    translated_response_bn = translate_english_to_bangla(response_en)
-
+def process_legal_query(query):
+    """Fetch legal response in Bangla."""
+    response_bn = get_legal_response(query)
     return f"""✅ **আপনার আইনি পরামর্শ:**  
 
-{translated_response_bn}  
+{response_bn}  
 
 ⚠️ **ডিসক্লেমার:** এটি একটি AI-ভিত্তিক আইনি সহায়তা, পেশাদার আইনজীবীর পরামর্শ নয়।
 """
