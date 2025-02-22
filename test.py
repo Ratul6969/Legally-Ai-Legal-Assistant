@@ -37,7 +37,12 @@ def get_legal_response(prompt):
     if prompt in response_cache:
         return response_cache[prompt]
 
-    formatted_prompt = f"বাংলাদেশের আইন অনুযায়ী শুধুমাত্র বুলেট পয়েন্টে একটি আইনি পরামর্শ দিন:\n\n{prompt}"
+    # Additional context for specific legal advice on acts and penal codes
+    formatted_prompt = f"""
+    আপনি বাংলাদেশে আইনি সহায়তা চান। আপনার প্রশ্নের জন্য, আমি শুধুমাত্র সংশ্লিষ্ট আইন, ধারা বা দণ্ডবিধি উল্লেখ করব। যদি প্রশ্নটি গুরুতর বা জীবন বিপজ্জনক কিছু থাকে, আমি জরুরি সাহায্য নং 999 দেওয়া হবে।
+
+    প্রশ্ন: "{prompt}"
+    """
 
     try:
         model = genai.GenerativeModel("gemini-pro")
@@ -65,6 +70,16 @@ def process_legal_query(query):
     if not query.strip():
         return "⚠️ অনুগ্রহ করে একটি আইনি প্রশ্ন লিখুন।"
 
+    # Check for serious or emergency queries and provide relevant advice
+    serious_keywords = ["threat", "rape", "violence", "murder", "emergency", "attack"]
+    if any(keyword in query.lower() for keyword in serious_keywords):
+        return """⚠️ **এটি একটি জরুরি পরিস্থিতি মনে হচ্ছে!**
+
+আপনি যদি হুমকি বা সহিংসতা সম্মুখীন হন, দয়া করে 999 নম্বরে কল করুন অথবা কাছের পুলিশ স্টেশনে যোগাযোগ করুন।
+
+এই AI-ভিত্তিক পরামর্শ একটি সামগ্রিক পরামর্শ নয়, আপনি একজন পেশাদার আইনজীবীর সাথে যোগাযোগ করার পরামর্শ দেয়া হচ্ছে।
+"""
+    
     with st.spinner("আইনি পরামর্শ সংগ্রহ করা হচ্ছে..."):
         response_bn = get_legal_response(query)
 
