@@ -28,4 +28,5 @@ semver>=3.0.0
 watchdog>=0.10.0
 filelock>=3.0.0
 python-dotenv
+google-generativeai
 
