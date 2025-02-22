@@ -37,9 +37,11 @@ def get_legal_response(prompt):
     if prompt in response_cache:
         return response_cache[prompt]
 
-    # Additional context for specific legal advice on acts and penal codes
+    # Adding specific context to explain the law and penal codes clearly in Bengali
     formatted_prompt = f"""
-    আপনি বাংলাদেশে আইনি সহায়তা চান। আপনার প্রশ্নের জন্য, আমি শুধুমাত্র সংশ্লিষ্ট আইন, ধারা বা দণ্ডবিধি উল্লেখ করব। যদি প্রশ্নটি গুরুতর বা জীবন বিপজ্জনক কিছু থাকে, আমি জরুরি সাহায্য নং 999 দেওয়া হবে।
+    আপনি বাংলাদেশে আইনি সহায়তা চান। আমি আপনার প্রশ্নের জন্য আইন, ধারা বা দণ্ডবিধি সম্পর্কে বিস্তারিত ব্যাখ্যা দেব। 
+
+    যদি আপনার প্রশ্নটি গুরুতর বা জীবন বিপজ্জনক কিছু হয় (যেমন: হুমকি, ধর্ষণ বা সহিংসতা), তবে আমি জরুরি সহায়তার জন্য 999 নম্বর প্রদান করব এবং আপনার পরিস্থিতির প্রতি সহানুভূতি জানাব।
 
     প্রশ্ন: "{prompt}"
     """
@@ -71,13 +73,15 @@ def process_legal_query(query):
         return "⚠️ অনুগ্রহ করে একটি আইনি প্রশ্ন লিখুন।"
 
     # Check for serious or emergency queries and provide relevant advice
-    serious_keywords = ["threat", "rape", "violence", "murder", "emergency", "attack"]
+    serious_keywords = ["threat", "rape", "violence", "murder", "emergency", "attack", "abuse"]
     if any(keyword in query.lower() for keyword in serious_keywords):
         return """⚠️ **এটি একটি জরুরি পরিস্থিতি মনে হচ্ছে!**
 
 আপনি যদি হুমকি বা সহিংসতা সম্মুখীন হন, দয়া করে 999 নম্বরে কল করুন অথবা কাছের পুলিশ স্টেশনে যোগাযোগ করুন।
 
-এই AI-ভিত্তিক পরামর্শ একটি সামগ্রিক পরামর্শ নয়, আপনি একজন পেশাদার আইনজীবীর সাথে যোগাযোগ করার পরামর্শ দেয়া হচ্ছে।
+আমরা জানি যে আপনি খুব কঠিন সময়ের মধ্যে আছেন, এবং আপনার নিরাপত্তা আমাদের প্রথম অগ্রাধিকার। আপনি একা নন, এবং সাহায্যের জন্য ফোন কল করতে দয়া করে দ্বিধা করবেন না।
+
+এটি একটি AI-ভিত্তিক পরামর্শ, এবং আপনি একজন পেশাদার আইনজীবীর সাথে যোগাযোগ করার পরামর্শ দেয়া হচ্ছে।
 """
     
     with st.spinner("আইনি পরামর্শ সংগ্রহ করা হচ্ছে..."):
