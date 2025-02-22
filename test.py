@@ -1,28 +1,26 @@
 import streamlit as st
 import json
-import requests
+import google.generativeai as genai
 import logging
-import os
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
 
-# Set page config (MUST be the first Streamlit command)
+# Set page config
 st.set_page_config(page_title="Legal Advice Assistant", page_icon="⚖️")
 
-# Gemini API Key (Handle free tier limitations)
+# Load Gemini API Key
 try:
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 except KeyError:
     st.warning("Please enter your Gemini API key in Streamlit secrets.")
     GEMINI_API_KEY = st.text_input("Gemini API Key (Free Tier):", type="password")
 
-# Gemini Model Endpoint
-BASE_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generate"
+# Initialize Gemini API
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
-headers = {"Content-Type": "application/json"}
-
-# Cache for API responses (Limit cache size)
+# Cache for API responses
 response_cache = {}
 MAX_CACHE_SIZE = 10
 
@@ -30,7 +28,7 @@ MAX_CACHE_SIZE = 10
 feedback_data = "feedback.json"
 
 def get_legal_response(prompt):
-    """Fetch legal response from Gemini API with caching and error handling."""
+    """Fetch legal response from Gemini API using Google's SDK."""
     if not GEMINI_API_KEY:
         return "⚠️ Error: API key not provided."
 
@@ -39,49 +37,40 @@ def get_legal_response(prompt):
 
     formatted_prompt = f"বাংলাদেশের আইন অনুযায়ী শুধুমাত্র বুলেট পয়েন্টে একটি আইনি পরামর্শ দিন:\n\n{prompt}"
 
-    payload = {
-        "contents": [{"parts": [{"text": formatted_prompt}]}],
-        "generationConfig": {"maxOutputTokens": 200},
-    }
-
     try:
-        response = requests.post(
-            f"{BASE_URL}?key={GEMINI_API_KEY}", headers=headers, json=payload
-        )
-        response.raise_for_status()
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(formatted_prompt)
 
-        result = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        if response and response.text:
+            result = response.text
 
-        if len(response_cache) >= MAX_CACHE_SIZE:
-            oldest_key = next(iter(response_cache))
-            del response_cache[oldest_key]
+            # Maintain cache size
+            if len(response_cache) >= MAX_CACHE_SIZE:
+                oldest_key = next(iter(response_cache))
+                del response_cache[oldest_key]
 
-        response_cache[prompt] = result
-        return result
+            response_cache[prompt] = result
+            return result
+        else:
+            return "⚠️ Error: No response from Gemini API."
 
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         logging.error(f"API request error: {e}")
         return "⚠️ Error: API request failed, please try again."
-    except (KeyError, IndexError, json.JSONDecodeError) as e:
-        logging.error(f"API response parsing error: {e}")
-        return "⚠️ Error: API response parsing failed."
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
-        return "⚠️ Error: An unexpected error occurred."
 
 def process_legal_query(query):
     """Fetch legal response in Bangla and handle empty queries."""
     if not query.strip():
-        return "Please enter a legal query."
+        return "⚠️ অনুগ্রহ করে একটি আইনি প্রশ্ন লিখুন।"
 
-    with st.spinner("Fetching legal advice..."):
+    with st.spinner("আইনি পরামর্শ সংগ্রহ করা হচ্ছে..."):
         response_bn = get_legal_response(query)
 
-    return f"""✅ **Your Legal Advice:**
+    return f"""✅ **আপনার আইনি পরামর্শ:**  
 
-{response_bn}
+{response_bn}  
 
-⚠️ **Disclaimer:** This is an AI-based legal assistance, not professional legal advice.
+⚠️ **ডিসক্লেমার:** এটি একটি AI-ভিত্তিক আইনি সহায়তা, পেশাদার আইনজীবীর পরামর্শ নয়।
 """
 
 def save_feedback(user_input, model_response, user_feedback):
@@ -99,16 +88,16 @@ def save_feedback(user_input, model_response, user_feedback):
         logging.error(f"Error saving feedback: {e}")
 
 # Streamlit UI
-st.title("Legal Advice Assistant")
+st.title("⚖️ Legal Advice Assistant")
 
-user_query = st.text_area("Enter your legal query:")
+user_query = st.text_area("আপনার আইনি প্রশ্ন লিখুন:")
 
-if st.button("Get Legal Advice"):
+if st.button("আইনি পরামর্শ নিন"):
     legal_advice = process_legal_query(user_query)
     st.markdown(legal_advice)
 
-    if "✅ **Your Legal Advice:**" in legal_advice:
-        feedback = st.radio("Was this advice helpful?", ("Yes", "No"))
-        if st.button("Submit Feedback"):
+    if "✅ **আপনার আইনি পরামর্শ:**" in legal_advice:
+        feedback = st.radio("এই পরামর্শটি কি আপনার জন্য সহায়ক ছিল?", ("হ্যাঁ", "না"))
+        if st.button("মতামত পাঠান"):
             save_feedback(user_query, legal_advice, feedback)
-            st.success("Feedback submitted!")
+            st.success("মতামত পাঠানো হয়েছে!")
