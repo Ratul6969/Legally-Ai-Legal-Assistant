@@ -30,18 +30,18 @@ MAX_CACHE_SIZE = 10
 feedback_data = "feedback.json"
 
 def get_legal_response(prompt):
-    """Fetch legal response from Gemini API using Google's SDK."""
+    """Fetch legal response focused on Bangladesh's Constitution and relevant laws."""
     if not GEMINI_API_KEY:
         return "⚠️ Error: API key not provided."
 
     if prompt in response_cache:
         return response_cache[prompt]
 
-    # Adding specific context to explain the law and penal codes clearly in Bengali
+    # Tailored query focusing on Bangladesh's legal context
     formatted_prompt = f"""
-    আপনি বাংলাদেশে আইনি সহায়তা চান। আমি আপনার প্রশ্নের জন্য আইন, ধারা বা দণ্ডবিধি সম্পর্কে বিস্তারিত ব্যাখ্যা দেব। 
+    আপনি বাংলাদেশের সংবিধান এবং আইন সম্পর্কে আইনি সহায়তা চান। আমি বাংলাদেশের আইনি প্রসঙ্গ অনুযায়ী আপনার প্রশ্নের জন্য বিস্তারিত ব্যাখ্যা দেব।
 
-    যদি আপনার প্রশ্নটি গুরুতর বা জীবন বিপজ্জনক কিছু হয় (যেমন: হুমকি, ধর্ষণ বা সহিংসতা), তবে আমি জরুরি সহায়তার জন্য 999 নম্বর প্রদান করব এবং আপনার পরিস্থিতির প্রতি সহানুভূতি জানাব।
+    দয়া করে মনে রাখবেন যে আমি শুধুমাত্র বাংলাদেশের সংবিধান, দণ্ডবিধি, এবং অন্যান্য বাংলাদেশের আইনের উপর ভিত্তি করে উত্তর দেব।
 
     প্রশ্ন: "{prompt}"
     """
@@ -68,7 +68,7 @@ def get_legal_response(prompt):
         return "⚠️ Error: API request failed, please try again."
 
 def process_legal_query(query):
-    """Fetch legal response in Bangla and handle empty queries."""
+    """Fetch legal response for Bangladesh-specific laws and handle empty queries."""
     if not query.strip():
         return "⚠️ অনুগ্রহ করে একটি আইনি প্রশ্ন লিখুন।"
 
