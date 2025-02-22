@@ -3,11 +3,12 @@ import json
 import google.generativeai as genai
 import logging
 
+# Set page config
+st.set_page_config(page_title="Legal Advice Assistant", page_icon="⚖️")
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
 
-# Set page config
-st.set_page_config(page_title="Legal Advice Assistant", page_icon="⚖️")
+
 
 # Load Gemini API Key
 try:
