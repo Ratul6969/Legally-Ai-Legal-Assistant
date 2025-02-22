@@ -8,19 +8,19 @@ st.set_page_config(page_title="Legal Advice Assistant", page_icon="⚖️")
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
 
-
-
-# Load Gemini API Key
-try:
+# Load Gemini API Key from Streamlit secrets or ask the user to input it
+if "GEMINI_API_KEY" in st.secrets:
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
-except KeyError:
+    genai.configure(api_key=GEMINI_API_KEY)
+else:
     st.warning("Please enter your Gemini API key in Streamlit secrets.")
     GEMINI_API_KEY = st.text_input("Gemini API Key (Free Tier):", type="password")
-
-if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-else:
-    st.error("⚠️ API key not found! Please add it to Streamlit secrets.")
+    
+    # Check if the user has provided the API key manually
+    if GEMINI_API_KEY:
+        genai.configure(api_key=GEMINI_API_KEY)
+    else:
+        st.error("⚠️ API key not found! Please add it to Streamlit secrets or enter it manually.")
 
 # Cache for API responses
 response_cache = {}
