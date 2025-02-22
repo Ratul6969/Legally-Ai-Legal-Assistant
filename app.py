@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 from test import process_legal_query
+import hashlib
 
 # Configure page settings
 st.set_page_config(
@@ -16,7 +17,7 @@ FEEDBACK_FILE = "feedback.csv"
 
 def save_feedback(question, response, feedback_text, rating):
     """Save user feedback to a CSV file."""
-    feedback_data = pd.DataFrame([{ "Question": question, "Response": response, "Feedback": feedback_text, "Rating": rating }])
+    feedback_data = pd.DataFrame([{"Question": question, "Response": response, "Feedback": feedback_text, "Rating": rating}])
     
     if os.path.exists(FEEDBACK_FILE):
         feedback_data.to_csv(FEEDBACK_FILE, mode='a', header=False, index=False)
@@ -46,7 +47,7 @@ if submitted and user_input:
             response = process_legal_query(user_input)
             st.session_state.response_cache[user_input] = response
     
-    st.session_state.conversation_history.append({ "question": user_input, "response": response })
+    st.session_state.conversation_history.append({"question": user_input, "response": response})
 
 # Display conversation history
 if st.session_state.conversation_history:
@@ -54,11 +55,14 @@ if st.session_state.conversation_history:
         st.markdown(f"**আপনি:** {chat['question']}")
         st.markdown(f"**Legally:** {chat['response']}")
         
+        # Generate unique keys for feedback widgets by hashing the question
+        unique_key = hashlib.md5(chat['question'].encode('utf-8')).hexdigest()
+
         # Feedback section
         with st.expander("🔄 মতামত দিন"):
-            rating = st.radio("উত্তরের মান কেমন ছিল?", ["ভাল", "গড়", "দুর্বল"], key=f"rating_{chat['question']}")
-            feedback_text = st.text_area("আপনার পরামর্শ (ঐচ্ছিক):", key=f"feedback_{chat['question']}")
-            if st.button("প্রেরণ", key=f"submit_feedback_{chat['question']}"):
+            rating = st.radio("উত্তরের মান কেমন ছিল?", ["ভাল", "গড়", "দুর্বল"], key=f"rating_{unique_key}")
+            feedback_text = st.text_area("আপনার পরামর্শ (ঐচ্ছিক):", key=f"feedback_{unique_key}")
+            if st.button("প্রেরণ", key=f"submit_feedback_{unique_key}"):
                 save_feedback(chat['question'], chat['response'], feedback_text, rating)
                 st.success("ধন্যবাদ! আপনার মতামত গ্রহণ করা হয়েছে।")
 
