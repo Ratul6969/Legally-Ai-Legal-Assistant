@@ -55,16 +55,6 @@ if st.session_state.conversation_history:
         st.markdown(f"**আপনি:** {chat['question']}")
         st.markdown(f"**Legally:** {chat['response']}")
         
-        # Generate unique keys for feedback widgets by hashing the question
-        unique_key = hashlib.md5(chat['question'].encode('utf-8')).hexdigest()
-
-        # Feedback section
-        with st.expander("🔄 মতামত দিন"):
-            rating = st.radio("উত্তরের মান কেমন ছিল?", ["ভাল", "গড়", "দুর্বল"], key=f"rating_{unique_key}")
-            feedback_text = st.text_area("আপনার পরামর্শ (ঐচ্ছিক):", key=f"feedback_{unique_key}")
-            if st.button("প্রেরণ", key=f"submit_feedback_{unique_key}"):
-                save_feedback(chat['question'], chat['response'], feedback_text, rating)
-                st.success("ধন্যবাদ! আপনার মতামত গ্রহণ করা হয়েছে।")
-
+        
 if __name__ == "__main__":
     st.write("\n")
