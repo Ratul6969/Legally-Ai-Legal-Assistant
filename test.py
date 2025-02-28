@@ -69,38 +69,33 @@ def get_legal_response(prompt):
         return "⚠️ Error: API request failed, please try again."
 
 def process_legal_query(query):
-    """Fetch legal response for Bangladesh-specific laws and handle empty queries."""
+    """Fetch legal response in Bangla and handle emergency cases properly."""
     if not query.strip():
         return "⚠️ অনুগ্রহ করে একটি আইনি প্রশ্ন লিখুন।"
 
-    # Check for serious or emergency queries and provide relevant advice
-    serious_keywords = ["ধর্ষন", "যৌন হয়রানি", "অশালীন ভাবে ধরা", "খুন", "হামলা", "আঘাত", "abuse"]
-    if any(keyword in query.lower() for keyword in serious_keywords):
+    with st.spinner("আইনি পরামর্শ সংগ্রহ করা হচ্ছে..."):
+        response_bn = get_legal_response(query)  # Generate legal response first
+
+    # Define emergency keywords
+    emergency_keywords = ["ধর্ষণ", "হুমকি", "প্রাণনাশের হুমকি", "আত্মহত্যা", "অপহরণ", "গুম", "খুন"] 
+
+    # Check if the query contains emergency keywords
+    if any(keyword in query.lower() for keyword in emergency_keywords):
         emergency_message = """⚠️ **এটি একটি জরুরি পরিস্থিতি মনে হচ্ছে!**  
 
-        আপনি যদি হুমকি বা সহিংসতা সম্মুখীন হন, দয়া করে **999** নম্বরে কল করুন অথবা কাছের **পুলিশ স্টেশনে** যোগাযোগ করুন।  
+আপনি যদি হুমকি বা সহিংসতা সম্মুখীন হন, দয়া করে **999** নম্বরে কল করুন অথবা কাছের **পুলিশ স্টেশনে** যোগাযোগ করুন।  
 
-        আপনার পরিস্থিতি খুবই গম্ভীর, এবং আমরা জানি এটি আপনাকে খুব বেশি চাপ দিচ্ছে। দয়া করে নিরাপদ থাকুন এবং আপনার কাছে সাহায্য পেতে দ্বিধা করবেন না। **আপনার নিরাপত্তা আমাদের প্রথম অগ্রাধিকার। আমরা আপনার পাশে আছি।**  
+আপনার পরিস্থিতি খুবই গম্ভীর, এবং আমরা জানি এটি আপনাকে খুব বেশি চাপ দিচ্ছে। দয়া করে নিরাপদ থাকুন এবং আপনার কাছে সাহায্য পেতে দ্বিধা করবেন না। **আপনার নিরাপত্তা আমাদের প্রথম অগ্রাধিকার। আমরা আপনার পাশে আছি।**  
 
-        ⚠️ **এটি একটি AI-ভিত্তিক পরামর্শ, এবং আপনি একজন পেশাদার আইনজীবীর সাথে যোগাযোগ করার পরামর্শ দেয়া হচ্ছে।**"""
+⚠️ **এটি একটি AI-ভিত্তিক পরামর্শ, এবং আপনি একজন পেশাদার আইনজীবীর সাথে যোগাযোগ করার পরামর্শ দেয়া হচ্ছে।**"""
 
+        # Return both legal response and emergency message
         return f"""{response_bn}  
 
-        ---  
-        {emergency_message}"""
+---  
+{emergency_message}"""
 
-    
-    with st.spinner("আইনি পরামর্শ সংগ্রহ করা হচ্ছে..."):
-        response_bn = get_legal_response(query)
-
-    # Human-like, comforting tone
-    return f""" **আপনার আইনি পরামর্শ:**  
-
-{response_bn}  
-
-
-আমরা জানি আপনি একটি গুরুত্বপূর্ণ প্রশ্ন করেছেন এবং আমরা চেষ্টা করেছি আপনার সমস্যা অনুযায়ী সঠিক পরামর্শ দেওয়ার। যদি আপনার আরও সাহায্যের প্রয়োজন হয়, দয়া করে পেশাদার আইনি সাহায্য গ্রহণ করুন।
-"""
+    return response_bn  # Return only legal response if no emergency keyword found
 
 def save_feedback(user_input, model_response, user_feedback):
     """Save user feedback for model improvement."""
