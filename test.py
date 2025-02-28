@@ -86,8 +86,8 @@ def process_legal_query(query):
 
         return f"""{response_bn}  
 
----  
-{emergency_message}"""
+        ---  
+        {emergency_message}"""
 
     
     with st.spinner("আইনি পরামর্শ সংগ্রহ করা হচ্ছে..."):
