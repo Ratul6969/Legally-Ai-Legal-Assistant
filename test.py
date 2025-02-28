@@ -47,7 +47,8 @@ def get_legal_response(prompt):
     """
 
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("models/gemini-2.0-flash-001")
+
         response = model.generate_content(formatted_prompt)
 
         if response and response.text:
