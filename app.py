@@ -52,6 +52,7 @@ if submitted and user_input:
 # Display conversation history
 if st.session_state.conversation_history:
     for chat in reversed(st.session_state.conversation_history):
+        st.markdown(f"**Chat History**")
         st.markdown(f"**আপনি:** {chat['question']}")
         st.markdown(f"**Legally:** {chat['response']}")
         
