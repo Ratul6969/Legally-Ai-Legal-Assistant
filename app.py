@@ -50,7 +50,6 @@ if submitted and user_input:
     st.session_state.conversation_history.append({"question": user_input, "response": response})
 
 # Display conversation history
-st.markdown(f"**Chat History**")
 if st.session_state.conversation_history:
     for chat in reversed(st.session_state.conversation_history):
         
