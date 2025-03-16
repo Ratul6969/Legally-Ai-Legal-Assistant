@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import requests  # Added for Zapier integration
 from test import process_legal_query
 import hashlib
 
@@ -11,6 +12,9 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed"
 )
+
+# Zapier Webhook URL (Replace this with your actual Zapier webhook)
+ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/22083684/2lkn802/"
 
 # Feedback storage file
 FEEDBACK_FILE = "feedback.csv"
@@ -23,6 +27,18 @@ def save_feedback(question, response, feedback_text, rating):
         feedback_data.to_csv(FEEDBACK_FILE, mode='a', header=False, index=False)
     else:
         feedback_data.to_csv(FEEDBACK_FILE, mode='w', header=True, index=False)
+
+# Function to send user query to Zapier
+def send_to_zapier(user_query):
+    payload = {"query": user_query}
+    try:
+        response = requests.post(ZAPIER_WEBHOOK_URL, json=payload)
+        if response.status_code == 200:
+            st.info("🔹 Query successfully stored for tracking.")
+        else:
+            st.warning("⚠️ Failed to store query in Zapier.")
+    except Exception as e:
+        st.warning(f"⚠️ Error sending query to Zapier: {e}")
 
 # Initialize session state
 if "conversation_history" not in st.session_state:
@@ -40,6 +56,8 @@ with st.form(key='chat_form'):
     submitted = st.form_submit_button("পরামর্শ পান")
 
 if submitted and user_input:
+    send_to_zapier(user_input)  # Send the query to Zapier
+    
     if user_input in st.session_state.response_cache:
         response = st.session_state.response_cache[user_input]
     else:
@@ -55,7 +73,6 @@ if st.session_state.conversation_history:
         
         st.markdown(f"**আপনি:** {chat['question']}")
         st.markdown(f"**Legally:** {chat['response']}")
-        
         
         # Generate unique keys for feedback widgets by hashing the question
         unique_key = hashlib.md5(chat['question'].encode('utf-8')).hexdigest()
