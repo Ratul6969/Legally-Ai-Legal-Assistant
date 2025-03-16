@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Zapier Webhook URL (Replace this with your actual Zapier webhook)
-ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/22083684/2lkn802/"
+ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/22083684/2lf2bjc/"
 
 # Feedback storage file
 FEEDBACK_FILE = "feedback.csv"
